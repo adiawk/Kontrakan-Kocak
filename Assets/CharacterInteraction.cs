@@ -4,13 +4,15 @@ using UnityEngine;
 
 public class CharacterInteraction : MonoBehaviour
 {
+    public bool isCanInteracting;
     [SerializeField] PlayerBallonInteraction playerBallonInteraction;
     [SerializeField] LayerMask interactableLayer;
     public float interactionRange = 2f; // Set the interaction range in the Unity Editor
 
     void Update()
     {
-        DetectInteractableObjects();
+        if(isCanInteracting)
+            DetectInteractableObjects();
     }
 
 
@@ -32,7 +34,7 @@ public class CharacterInteraction : MonoBehaviour
                 ShowInteractionPrompt(interactableObject);
                 foundInteractableObject = true;
 
-                if (Input.GetKeyDown(KeyCode.E))
+                if (Input.GetKeyDown(KeyCode.E) && isCanInteracting)
                 {
                     // Perform interaction with the interactable object
                     interactableObject.Interact();
@@ -54,11 +56,11 @@ public class CharacterInteraction : MonoBehaviour
         {
             //interactionPrompt.text = "Press E to interact";
             playerBallonInteraction.ballonGameobject.SetActive(true);
-            playerBallonInteraction.Set(interacted.icon);
+            playerBallonInteraction.Set(interacted.data.icon);
         }
     }
 
-    void HideInteractionPrompt()
+    public void HideInteractionPrompt()
     {
         // Hide the UI prompt
         if (playerBallonInteraction != null)

@@ -6,6 +6,7 @@ public class CharacterMovement : MonoBehaviour
 {
     public bool isMoveable;
     [SerializeField] float moveSpeed;
+    [SerializeField] Transform visualDirection;
 
     
     // Update is called once per frame
@@ -24,5 +25,14 @@ public class CharacterMovement : MonoBehaviour
         Vector2 moveDir = new Vector2(param, 0) * moveSpeed * Time.deltaTime;
 
         this.transform.Translate(moveDir);
+
+        if(param > 0)
+        {
+            visualDirection.localScale = new Vector3(1f, 1f, 1f);
+        }
+        else if (param < 0)
+        {
+            visualDirection.localScale = new Vector3(-1f, 1f, 1f);
+        }
     }
 }

@@ -7,7 +7,9 @@ public class UIInventory_Item : MonoBehaviour
 {
     public Image imgIcon;
 
-    public void Set(Interactable item)
+    [SerializeField] GameObject accomplised;
+
+    public void Set(InteractableData item)
     {
         if (item == null)
         {
@@ -17,5 +19,10 @@ public class UIInventory_Item : MonoBehaviour
         {
             imgIcon.sprite = item.icon;
         }
+    }
+
+    public void Accomplished()
+    {
+        accomplised.gameObject.SetActive(true);
     }
 }

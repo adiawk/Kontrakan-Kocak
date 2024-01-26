@@ -6,7 +6,7 @@ using UnityEngine;
 public class InventorySystem : MonoBehaviour
 {
     public static InventorySystem instance;
-    public List<Interactable> interactableList = new List<Interactable>();
+    public List<InteractableData> interactableList = new List<InteractableData>();
 
 
     public event Action OnItemUpdated;
@@ -16,14 +16,14 @@ public class InventorySystem : MonoBehaviour
         instance = this;
     }
 
-    public void AddItem(Interactable item)
+    public void AddItem(InteractableData item)
     {
         interactableList.Add(item);
 
         OnItemUpdated?.Invoke();
     }
 
-    public void RemoveItem(Interactable item)
+    public void RemoveItem(InteractableData item)
     {
         interactableList.Remove(item);
 
