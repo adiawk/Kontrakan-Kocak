@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
+using DG;
 
 public enum NPC_State
 {
@@ -21,9 +23,15 @@ public class NPC_AI : MonoBehaviour
     [SerializeField] float maxAwareTime;
 
     [Header("STATUS")]
+    Vector3 goToDestination;
+    float randomMaxAwareTime;
     [SerializeField] float currentIdleTime;
     [SerializeField] float currentAwareTime;
 
+    public float speed;
+
+    [SerializeField] GameObject parentAwareProgress;
+    [SerializeField] UIProgressBar progressBar;
 
 
     public NPC_State states;
@@ -66,27 +74,36 @@ public class NPC_AI : MonoBehaviour
 
     public void SwitchState(NPC_State newState)
     {
+        flagMovingChasing = false;
+        flagMovingGoto = false;
 
         //ON NEW STATE ENTER
-        switch(newState)
+        switch (newState)
         {
             case NPC_State.IDLE:
                 currentIdleTime = Random.Range(minIdleTime, maxIdleTime);
+                parentAwareProgress.gameObject.SetActive(false);
                 break;
 
             case NPC_State.GO_TO:
+
+                parentAwareProgress.gameObject.SetActive(false);
                 //Decide position to go (room point)
+                goToDestination = RoomManager.instance.GetAvailableReadyTrap;
                 break;
 
             case NPC_State.AWARE:
-                currentAwareTime = Random.Range(minAwareTime, maxAwareTime);
+                parentAwareProgress.gameObject.SetActive(true);
+                randomMaxAwareTime = Random.Range(minAwareTime, maxAwareTime);
+                currentAwareTime = randomMaxAwareTime;
                 break;
 
             case NPC_State.CHASING:
-
+                
                 break;
         }
 
+        Debug.Log($"STATE: {newState}");
 
         states = newState;
     }
@@ -106,37 +123,65 @@ public class NPC_AI : MonoBehaviour
         }
     }
 
+    bool flagMovingGoto = false;
     void AIState_GoTo()
     {
         //Vector2 destination = null;
+        if (!flagMovingGoto)
+        {
+            flagMovingGoto = true;
+
+            transform.DOMoveX(goToDestination.x, speed).SetSpeedBased()
+                .OnComplete(()=>SwitchState(NPC_State.IDLE));
+        }
     }
 
     void AIState_Aware()
     {
-        if(currentAwareTime > 0)
+        bool isPlayerVisible = true;
+        if(isPlayerVisible)
         {
-            currentAwareTime -= Time.deltaTime;
+            if (currentAwareTime > 0)
+            {
+                currentAwareTime -= Time.deltaTime;
+
+                float progress = Mathf.Clamp01(currentAwareTime / randomMaxAwareTime);
+
+                progressBar.SetProgress(1f - progress);
+            }
+            else
+            {
+                //Jika masih aware maka player akan ditangkan dan game over
+                currentAwareTime = 0;
+
+                //chasing states
+                SwitchState(NPC_State.CHASING);
+
+                Debug.Log("CHASING");
+
+                //player stunned
+                playerManager.PlayerOnChanneling(true);
+            }
         }
         else
         {
-            //Jika masih aware maka player akan ditangkan dan game over
-            currentAwareTime = 0;
-
-            //chasing states
-            SwitchState(NPC_State.CHASING);
-
-            //player stunned
-            playerManager.PlayerOnChanneling(true);
+            SwitchState(NPC_State.IDLE);
         }
+        
     }
 
+    bool flagMovingChasing = false;
     void AIState_Chasing()
     {
-        
-
         //animation walk
 
-        //go to player position to catch
-        //dotween pro, trasform.position
+        if (!flagMovingChasing)
+        {
+            flagMovingChasing = true;
+            Vector2 playerPos = playerManager.transform.position;
+            //go to player position to catch
+            transform.DOMoveX(playerPos.x, speed * 1.5f).SetSpeedBased()
+                .OnComplete(() => GameManager.instance.GameOver()); 
+        }   
     }
 }

@@ -24,7 +24,7 @@ public class NPC_Detection : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(ai.states != NPC_State.AWARE)
+        if(ai.states != NPC_State.AWARE && ai.states != NPC_State.CHASING)
         {
             if (roomIdentifier.currentRoom == player.roomIdentifier.currentRoom)
             {
