@@ -7,6 +7,7 @@ public class PlayerManager : MonoBehaviour
     public static PlayerManager instance;
     CharacterMovement move;
     CharacterInteraction interaction;
+    public RoomIdentifier roomIdentifier;
 
     private void Awake()
     {
@@ -14,6 +15,7 @@ public class PlayerManager : MonoBehaviour
 
         TryGetComponent(out move);
         TryGetComponent(out interaction);
+        TryGetComponent(out roomIdentifier);
     }
 
     public void PlayerOnChanneling(bool isChanneling)

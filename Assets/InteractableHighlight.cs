@@ -53,6 +53,7 @@ public class InteractableHighlight : MonoBehaviour
 
     public void SetOff()
     {
+        isHighLightOn = false;
         foreach (var item in sprites)
         {
             item.sharedMaterial = materialDefault;
