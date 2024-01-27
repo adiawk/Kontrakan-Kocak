@@ -5,57 +5,60 @@ using UnityEngine.Events;
 
 public class CharacterHideAbility : MonoBehaviour
 {
+    PlayerManager PlayerManager;
     public bool isVisible = true;
 
-    bool isUsingAbility;
     [SerializeField] float timeAbilityCooldown;
+
+    bool isCooldown;
 
     public UIProgressBar progressBar;
     public UnityEvent OnCooldownFinish;
     public UnityEvent OnAbilityUsed;
-    public UnityEvent OnAbilityRunsOut;
+    public UnityEvent OnAbilityPopOut;
 
-    //private void Update()
-    //{
-    //    if(!isUsingAbility)
-    //    {
-    //        if (isCooldown)
-    //        {
-    //            if (currentAbilityCooldown > 0)
-    //            {
-    //                currentAbilityCooldown -= Time.deltaTime;
-    //            }
-    //            else
-    //            {
-    //                currentAbilityCooldown = 0;
+    private void Start()
+    {
+        TryGetComponent(out PlayerManager);
+    }
 
-    //                CooldownFinished();
-    //            }
-    //        }
-    //    }
-    //}
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            ToggleAbility();
+        }
+    }
 
     void CooldownFinished()
     {
         OnCooldownFinish?.Invoke();
+        isCooldown = false;
     }
 
     void HideAbility()
     {
         isVisible = false;
-        isUsingAbility = true;
+
+        OnAbilityUsed?.Invoke();
+
+        PlayerManager.TogglePlayerMove(false);
     }
 
     void Show()
     {
         isVisible = true;
-        isUsingAbility = false;
+
+        OnAbilityPopOut?.Invoke();
+        PlayerManager.TogglePlayerMove(true);
 
         StartCoroutine(CooldownAbility());
     }
 
     IEnumerator CooldownAbility()
     {
+        isCooldown = true;
+
         float maxTime = timeAbilityCooldown;
         float time = timeAbilityCooldown;
 
@@ -73,6 +76,9 @@ public class CharacterHideAbility : MonoBehaviour
 
     public void ToggleAbility()
     {
+        if (isCooldown || PlayerManager.isChannelling)
+            return;
+
         isVisible = !isVisible;
 
         if(isVisible)

@@ -7,6 +7,11 @@ public class InteractableData : ScriptableObject
 {
     public Sprite icon;
 
+    //public Sprite blankTrapSprite;
+    public Sprite buildTrapSprite;
+
     public List<InteractableData> recepies = new List<InteractableData>();
 
+    public string trapEffectActionToNPC;
+    public float stunDuration;
 }

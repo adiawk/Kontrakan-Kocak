@@ -14,10 +14,12 @@ public class UIInventory_Item : MonoBehaviour
         if (item == null)
         {
             imgIcon.sprite = null;
+            imgIcon.color = new Color(1, 1, 1, 0);
         }
         else
         {
             imgIcon.sprite = item.icon;
+            imgIcon.color = new Color(1, 1, 1, 1);
         }
     }
 

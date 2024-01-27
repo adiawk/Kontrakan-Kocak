@@ -14,8 +14,8 @@ TagManager:
   - Interactable
   - Camera Collider
   - Room
-  - 
-  - 
+  - Player
+  - NPC
   - 
   - 
   - 

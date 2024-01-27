@@ -6,6 +6,7 @@ using UnityEngine.Events;
 
 public class InteractableTrap : Interactable
 {
+    [SerializeField] SpriteRenderer visualSprite;
     [HideInInspector] public bool isFinishBuild;
 
     [SerializeField] UITrapRecepies uiTrapRecepies;
@@ -17,11 +18,15 @@ public class InteractableTrap : Interactable
 
     float currentBuildTime;
 
+    public GameObject onTrapDoneSpawnObj;
     public UnityEvent OnRecepiesUpdated;
     public UnityEvent OnStartBuilding;
     public UnityEvent<float> OnBuildingProgress;
     public UnityEvent OnFinishedBuilding;
 
+    public UnityEvent OnTrapHit;
+
+    NPC_AI npc;
 
     private void Awake()
     {
@@ -37,7 +42,16 @@ public class InteractableTrap : Interactable
 
     private void Start()
     {
+        npc = NPC_AI.instance;
         uiTrapRecepies.InitializeUIRecepies();
+    }
+
+    private void Update()
+    {
+        if(isFinishBuild)
+        {
+            DetectNPCInRange();
+        }
     }
 
     public override void Interact()
@@ -121,9 +135,46 @@ public class InteractableTrap : Interactable
     void OnFinishedBuild()
     {
         isFinishBuild = true;
+        SetRealSpriteBuild();
         OnFinishedBuilding?.Invoke();
 
         PlayerManager.instance.PlayerOnChanneling(false);
+    }
+
+    void SetRealSpriteBuild()
+    {
+        visualSprite.sprite = data.buildTrapSprite;
+    }
+
+    public float trapBuildDetectRadius;
+    void DetectNPCInRange()
+    {
+        
+        // Check if the distance between this object's X position and NPC's X position is lower than the threshold
+        float distance = Mathf.Abs(transform.position.x - npc.transform.position.x);
+        float distanceThreshold = trapBuildDetectRadius;
+
+        if (distance < distanceThreshold)
+        {
+            // Do something when the distance is lower than the threshold
+            //Debug.Log("Distance is less than the threshold.");
+            npc.trapped.Trapped(data.trapEffectActionToNPC, data.stunDuration);
+
+            if(onTrapDoneSpawnObj != null)
+            {
+                Instantiate(onTrapDoneSpawnObj, transform.position, Quaternion.identity);
+            }
+            OnTrapHit?.Invoke();
+            RoomManager.instance.trapHitDone++;
+            gameObject.SetActive(false);
+        }
+    }
+
+    // Draw the detection radius in the Scene view using Gizmos
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, trapBuildDetectRadius);
     }
 }
 

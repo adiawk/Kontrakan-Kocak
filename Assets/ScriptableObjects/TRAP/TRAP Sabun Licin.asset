@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 450a20ea896cf054cab11c008166691e, type: 3}
+  m_Name: TRAP Sabun Licin
+  m_EditorClassIdentifier: 
+  icon: {fileID: 21300000, guid: 1c75a46197b03304e8ad4ffb926bdd1d, type: 3}
+  buildTrapSprite: {fileID: 21300000, guid: 1c75a46197b03304e8ad4ffb926bdd1d, type: 3}
+  recepies:
+  - {fileID: 11400000, guid: de22262f65ee8f54b9c1dc2029225cea, type: 2}
+  - {fileID: 11400000, guid: 462d4f547d9aec949b8c3c6d98971c9a, type: 2}
+  trapEffectActionToNPC: Kepleset
+  stunDuration: 2

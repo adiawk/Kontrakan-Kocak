@@ -8,6 +8,10 @@ public class PlayerManager : MonoBehaviour
     CharacterMovement move;
     CharacterInteraction interaction;
     public RoomIdentifier roomIdentifier;
+    public CharacterAnimation anim;
+    public CharacterHideAbility hideAbility;
+
+    public bool isChannelling;
 
     private void Awake()
     {
@@ -16,12 +20,16 @@ public class PlayerManager : MonoBehaviour
         TryGetComponent(out move);
         TryGetComponent(out interaction);
         TryGetComponent(out roomIdentifier);
+        TryGetComponent(out anim);
+        TryGetComponent(out hideAbility);
     }
 
     public void PlayerOnChanneling(bool isChanneling)
     {
         TogglePlayerMove(!isChanneling);
         TogglePlayerInteraction(!isChanneling);
+
+        isChannelling = isChanneling;
     }
 
     public void TogglePlayerMove(bool isAbleToMove)

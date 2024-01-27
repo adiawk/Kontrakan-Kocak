@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class RoomManager : MonoBehaviour
 {
@@ -9,6 +10,39 @@ public class RoomManager : MonoBehaviour
     public InteractableTrap[] traps;
     public Room[] rooms;
 
+    [SerializeField] GameObject[] secondaryVCAM;
+
+
+    public void DisableSecondaryVCAM()
+    {
+        foreach (var item in secondaryVCAM)
+        {
+            try
+            {
+                item.gameObject.SetActive(false);
+            }
+            catch { };
+        }
+    }
+    int _trapDone;
+
+    public int trapHitDone
+    {
+        get
+        {
+            return _trapDone;
+        }
+
+        set
+        {
+            _trapDone ++;
+            OnTrapDoneUpdate?.Invoke(_trapDone, traps.Length);
+
+            Debug.Log("ADD");
+        }
+    }
+
+    public UnityEvent<int,int> OnTrapDoneUpdate;
 
     private void Awake()
     {

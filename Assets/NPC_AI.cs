@@ -9,12 +9,20 @@ public enum NPC_State
     IDLE,
     GO_TO,
     AWARE,
-    CHASING
+    CHASING,
+    STUNNED
 }
 
 public class NPC_AI : MonoBehaviour
 {
+    public static NPC_AI instance;
+    [SerializeField] Transform visualNPC;
+
+    RoomIdentifier roomIdentifier;
     PlayerManager playerManager;
+    NPC_Detection NPC_Detection;
+    CharacterAnimation anim;
+    public NPC_Trapped trapped;
 
     [Header("DATA AI")]
     [SerializeField] float minIdleTime;
@@ -24,6 +32,8 @@ public class NPC_AI : MonoBehaviour
 
     [Header("STATUS")]
     Vector3 goToDestination;
+    InteractableTrap trapDestination;
+
     float randomMaxAwareTime;
     [SerializeField] float currentIdleTime;
     [SerializeField] float currentAwareTime;
@@ -34,8 +44,17 @@ public class NPC_AI : MonoBehaviour
     [SerializeField] UIProgressBar progressBar;
 
 
+    [HideInInspector] public float StunDuration;
     public NPC_State states;
 
+    private void Awake()
+    {
+        instance = this;
+        TryGetComponent(out trapped);
+        TryGetComponent(out anim);
+        TryGetComponent(out roomIdentifier);
+        TryGetComponent(out NPC_Detection);
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -83,6 +102,7 @@ public class NPC_AI : MonoBehaviour
             case NPC_State.IDLE:
                 currentIdleTime = Random.Range(minIdleTime, maxIdleTime);
                 parentAwareProgress.gameObject.SetActive(false);
+                anim.SetWalk(false);
                 break;
 
             case NPC_State.GO_TO:
@@ -96,16 +116,34 @@ public class NPC_AI : MonoBehaviour
                 parentAwareProgress.gameObject.SetActive(true);
                 randomMaxAwareTime = Random.Range(minAwareTime, maxAwareTime);
                 currentAwareTime = randomMaxAwareTime;
+                anim.SetWalk(false);
                 break;
 
             case NPC_State.CHASING:
-                
+                anim.SetWalk(true);
+                break;
+
+            case NPC_State.STUNNED:
+                StartCoroutine(BackToIdle());
+                anim.SetWalk(false);
                 break;
         }
 
-        Debug.Log($"STATE: {newState}");
+        //Debug.Log($"STATE: {newState}");
 
         states = newState;
+    }
+
+    IEnumerator BackToIdle()
+    {
+        UI_PlayerHUD.instance.HideUI();
+
+        yield return new WaitForSeconds(StunDuration);
+        UI_PlayerHUD.instance.ShowUI();
+        RoomManager.instance.DisableSecondaryVCAM();
+        SwitchState(NPC_State.IDLE);
+
+        GameManager.instance.CheckGameCondition();
     }
 
     void AIState_Idle()
@@ -124,22 +162,78 @@ public class NPC_AI : MonoBehaviour
     }
 
     bool flagMovingGoto = false;
+    float latestXPosition;
     void AIState_GoTo()
     {
-        //Vector2 destination = null;
-        if (!flagMovingGoto)
-        {
-            flagMovingGoto = true;
 
-            transform.DOMoveX(goToDestination.x, speed).SetSpeedBased()
-                .OnComplete(()=>SwitchState(NPC_State.IDLE));
+        //Vector2 destination = null;
+        //if (!flagMovingGoto)
+        //{
+        //    flagMovingGoto = true;
+
+        //    //transform.DOMoveX(goToDestination.x, speed).SetSpeedBased()
+        //    //    .OnComplete(()=>SwitchState(NPC_State.IDLE));
+
+
+
+        //}
+
+        float destinationX = goToDestination.x;
+        float arrivalThreshold = 1f;
+
+        // Calculate the distance to the destination along the X-axis
+        float distanceToDestination = Mathf.Abs(destinationX - transform.position.x);
+
+        // Check if the distance to the destination is greater than the arrival threshold
+        if (distanceToDestination > arrivalThreshold)
+        {
+            // Calculate the direction to the destination
+            float direction = Mathf.Sign(destinationX - transform.position.x);
+
+            // Calculate the movement along the X-axis
+            float movement = direction * speed * Time.deltaTime;
+
+            // Update the position to move towards the destination along the X-axis
+            transform.Translate(new Vector3(movement, 0, 0));
+
+            if (movement > 0)
+            {
+                visualNPC.localScale = new Vector3(1, 1, 1);
+                anim.SetWalk(true);
+            }
+            else if (movement < 0)
+            {
+                visualNPC.localScale = new Vector3(-1, 1, 1);
+                anim.SetWalk(true);
+            }
+            else
+            {
+                anim.SetWalk(false);
+            }
+        }
+        else
+        {
+            // If the distance is less than the arrival threshold, consider it has arrived
+            //Debug.Log("Destination reached!");
+
+            //IDLE BALIK (KALO DESTINATION NYA ROOM)
+            SwitchState(NPC_State.IDLE);
+
         }
     }
 
     void AIState_Aware()
     {
-        bool isPlayerVisible = true;
-        if(isPlayerVisible)
+        anim.SetWalk(false);
+
+        bool isPlayerVisible = playerManager.hideAbility.isVisible;
+        bool isInSameRoom = true/*roomIdentifier.currentRoom == playerManager.roomIdentifier.currentRoom*/;
+        bool isInRange = NPC_Detection.IsInAwareRangeX;
+        // Check if the distance between this object's X position and NPC's X position is lower than the threshold
+        //float distance = Mathf.Abs(transform.position.x - playerManager.transform.position.x);
+        //isInRange = distance < 8f;
+
+        if (isPlayerVisible && isInSameRoom && isInRange)
         {
             if (currentAwareTime > 0)
             {

@@ -18,6 +18,8 @@ public class Room : MonoBehaviour
         if (room != null)
         {
             room.currentRoom = roomName;
+
+            //Debug.Log($"{collision.gameObject.name} In: {roomName}");
         }
     }
 }
