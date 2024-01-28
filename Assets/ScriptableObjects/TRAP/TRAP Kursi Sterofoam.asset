@@ -19,4 +19,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 775accf1014cfe94a96272e4cf4b66d0, type: 2}
   - {fileID: 11400000, guid: 49855d03eceb3fc49b1134ad27d95d8e, type: 2}
   trapEffectActionToNPC: Kepleset
-  stunDuration: 2
+  stunDuration: 4
